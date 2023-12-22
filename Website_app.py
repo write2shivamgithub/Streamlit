@@ -7,6 +7,45 @@ st.set_page_config(layout='wide',page_title='Startup Analysis')
 
 df = pd.read_csv('startup_cleaned.csv')
 df['date'] = pd.to_datetime(df['date'], errors = 'coerce')
+df['year'] = df['date'].dt.year
+df['month'] = df['date'].dt.month
+
+def load_overall_analysis():
+    st.title('Overall Analysis')
+
+    #total invested amount
+    total = round(df['amount'].sum())
+    #max amount infused in startup
+    max_funding = df.groupby('startup')['amount'].max().sort_values(ascending=False).head(1).values[0]
+    #avg ticket size
+    avg_funding = df.groupby('startup')['amount'].sum().mean()
+    #total funded startup
+    num_startups = df['startup'].nunique()
+
+    col1,col2,col3,col4 = st.columns(4)
+
+    with col1:
+        st.metric('Total',str(total) + 'Cr')
+    with col2:
+        st.metric('Max',str(max_funding) + 'Cr')
+    with col3:
+        st.metric('Avg',str(round(avg_funding)) + 'Cr')
+    with col4:
+        st.metric('Funded Startups',str(num_startups))
+
+    #MoM Graph
+    st.header('MoM graph')
+    selected_option = st.selectbox('Select Type',['Total','Count'])
+    if selected_option == 'Total':
+        temp_df = df.groupby(['year','month'])['amount'].sum().reset_index()
+    else:
+        temp_df = df.groupby(['year','month'])['amount'].count().reset_index()
+    temp_df['x_axis'] = temp_df['year'].astype(str) + '-' + temp_df['month'].astype(str)
+    fig6, ax6 = plt.subplots()
+    ax6.plot(temp_df['x_axis'],temp_df['amount'])
+    st.pyplot(fig6)
+
+
 
 def load_investor_details(investor):
     st.title(investor)
@@ -57,7 +96,7 @@ st.sidebar.title('Starup Funding Analysis')
 option = st.sidebar.selectbox('Select One',['Overall Analysis','Startup','Investor'])
 
 if option == 'Overall Analysis':
-    st.title('Overall Analysis')
+        load_overall_analysis()
 elif option == 'Startup':
     st.title('Startup')
     st.sidebar.selectbox('Select Startup',sorted(df['startup'].unique().tolist()))
