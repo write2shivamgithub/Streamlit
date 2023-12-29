@@ -82,7 +82,7 @@ def load_overall_analysis():
 
 
 def load_investor_details(investor): 
-    st.title(investor)
+    st.header(investor)
 
     #load the recent 5 investments of investor
     last5_df = df[df['investors'].str.contains(investor)].head()[['date','startup','vertical','city','round','amount']]
@@ -125,6 +125,15 @@ def load_investor_details(investor):
     ax5.plot(year_series.index,year_series.values)
     st.pyplot(fig5)
 
+
+def load_startup_deatils(Startup):
+    st.header(Startup)
+
+    #Funding Rounds
+    stage = df[df['startup'].str.contains(Startup)][['date','round','investors','city','vertical','subvertical']]
+    st.dataframe(stage)
+    
+
 st.sidebar.title('Starup Funding Analysis') 
 
 option = st.sidebar.selectbox('Select One',['Overall Analysis','Startup','Investor'])
@@ -132,9 +141,12 @@ option = st.sidebar.selectbox('Select One',['Overall Analysis','Startup','Invest
 if option == 'Overall Analysis':
         load_overall_analysis()
 elif option == 'Startup':
-    st.title('Startup')
-    st.sidebar.selectbox('Select Startup',sorted(df['startup'].unique().tolist()))
+    st.title('Startup Details...')
+    selected_startup = st.sidebar.selectbox('Select Startup',sorted(df['startup'].unique().tolist()))
     btn1 = st.sidebar.button('Find Startup Details')
+    if btn1:
+        load_startup_deatils(selected_startup)
+
 else:
     st.title('Investor Analysis')
     selected_investor = st.sidebar.selectbox('Select Investor',sorted(set(df['investors'].str.split(',').sum())))
