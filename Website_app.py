@@ -14,7 +14,6 @@ df['vertical'] = df['vertical'].str.replace('ECommerce Marketplace','E-Commerce'
 df['city'] = df['city'].str.replace('Bengaluru','Bangalore')
 
 def load_overall_analysis():
-    import matplotlib.pyplot as plt
     st.title('Overall Analysis')
 
     #total invested amount          
@@ -82,7 +81,6 @@ def load_overall_analysis():
 
 
 def load_investor_details(investor): 
-    import matplotlib.pyplot as plt
     st.header(investor)
 
     #load the recent 5 investments of investor
