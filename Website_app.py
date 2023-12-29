@@ -1,6 +1,5 @@
 import pandas as pd 
 import streamlit as st 
-import matplotlib.pyplot as plt 
 
 
 st.set_page_config(layout='wide',page_title='Startup Analysis')
@@ -47,7 +46,7 @@ def load_overall_analysis():
     temp_df['x_axis'] = temp_df['year'].astype(str) + '-' + temp_df['month'].astype(str)
     fig6, ax6 = plt.subplots()
     ax6.plot(temp_df['x_axis'],temp_df['amount'])
-    plt.xticks(rotation='vertical')  
+    ax6.set_xticklabels(temp_df['x_axis'], rotation='vertical')
     st.pyplot(fig6)
 
     #Sector Analysis
@@ -70,7 +69,7 @@ def load_overall_analysis():
         funding_series = df.groupby('round')['amount'].count().sort_values(ascending=False)
     fig8, ax8 = plt.subplots()
     ax8.bar(funding_series.index , funding_series.values)
-    plt.xticks(rotation='vertical')         
+    ax8.set_xticklabels(funding_series.index, rotation='vertical')       
     st.pyplot(fig8)
 
     #City wise funding
