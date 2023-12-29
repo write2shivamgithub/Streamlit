@@ -9,11 +9,15 @@ df = pd.read_csv('startup_cleaned.csv')
 df['date'] = pd.to_datetime(df['date'], errors = 'coerce')
 df['year'] = df['date'].dt.year
 df['month'] = df['date'].dt.month
+df['vertical'] = df['vertical'].str.replace('eCommerce','E-Commerce')
+df['vertical'] = df['vertical'].str.replace('ECommerce','E-Commerce')
+df['vertical'] = df['vertical'].str.replace('ECommerce Marketplace','E-Commerce')
+df['city'] = df['city'].str.replace('Bengaluru','Bangalore')
 
 def load_overall_analysis():
     st.title('Overall Analysis')
 
-    #total invested amount
+    #total invested amount          
     total = round(df['amount'].sum())
     #max amount infused in startup
     max_funding = df.groupby('startup')['amount'].max().sort_values(ascending=False).head(1).values[0]
@@ -25,29 +29,59 @@ def load_overall_analysis():
     col1,col2,col3,col4 = st.columns(4)
 
     with col1:
-        st.metric('Total',str(total) + 'Cr')
+        st.metric('Total Funding',str(total) + 'Cr')
     with col2:
-        st.metric('Max',str(max_funding) + 'Cr')
+        st.metric('Max Funding',str(max_funding) + 'Cr')
     with col3:
-        st.metric('Avg',str(round(avg_funding)) + 'Cr')
+        st.metric('Avg Funding',str(round(avg_funding)) + 'Cr')
     with col4:
-        st.metric('Funded Startups',str(num_startups))
+        st.metric('No. of Funded Startups',str(num_startups))
 
     #MoM Graph
     st.header('MoM graph')
-    selected_option = st.selectbox('Select Type',['Total','Count'])
-    if selected_option == 'Total':
+    mom_selected_option = st.selectbox('Select Type',['Total','Count'])
+    if mom_selected_option == 'Total':
         temp_df = df.groupby(['year','month'])['amount'].sum().reset_index()
     else:
         temp_df = df.groupby(['year','month'])['amount'].count().reset_index()
     temp_df['x_axis'] = temp_df['year'].astype(str) + '-' + temp_df['month'].astype(str)
     fig6, ax6 = plt.subplots()
     ax6.plot(temp_df['x_axis'],temp_df['amount'])
+    plt.xticks(rotation='vertical')  
     st.pyplot(fig6)
 
+    #Sector Analysis
+    st.header('Sector Analysis Pie-Chart')
+    sector_selected_option = st.selectbox('Select Type',['Sum','Count'])
+    if sector_selected_option == 'Sum':
+        sector_data = df.groupby('vertical')['amount'].sum().sort_values(ascending=False).head(10)
+    else:
+        sector_data = df.groupby('vertical')['amount'].count().sort_values(ascending=False).head(10)
+    fig7, ax7 = plt.subplots()
+    ax7.pie(sector_data, labels=sector_data.index, autopct="%0.01f")
+    st.pyplot(fig7)
+
+    #Type of funding
+    st.header('Round Analysis')
+    funding_selected_option = st.selectbox('Select_Type',['Sum','Count'])
+    if funding_selected_option == 'Sum':
+        funding_series = df.groupby('round')['amount'].sum().sort_values(ascending=False)
+    else:
+        funding_series = df.groupby('round')['amount'].count().sort_values(ascending=False)
+    fig8, ax8 = plt.subplots()
+    ax8.bar(funding_series.index , funding_series.values)
+    plt.xticks(rotation='vertical')         
+    st.pyplot(fig8)
+
+    #City wise funding
+    st.header('City wise funding Analysis')
+    city_funding = df.groupby('city')['amount'].sum().sort_values(ascending=False)
+    fig9, ax9 = plt.subplots()
+    ax9.pie(city_funding, labels=city_funding.index, autopct="%0.01f")
+    st.pyplot(fig9)
 
 
-def load_investor_details(investor):
+def load_investor_details(investor): 
     st.title(investor)
 
     #load the recent 5 investments of investor
